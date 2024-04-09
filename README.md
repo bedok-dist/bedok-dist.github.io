@@ -15,7 +15,8 @@ https://bedok-dist.github/ webapp (in-progress)
     <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-app.js"></script>
     <script src="https://unpkg.com/firebase@7.6.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-database.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script> -->
+    <script src="https://unpkg.com/vue@3.3.8"></script>
     <script src="https://bedok-dist.github.io/wrapper.js"></script>
 </head>
 <body>
@@ -45,7 +46,7 @@ https://bedok-dist.github/ webapp (in-progress)
       </div>
     </script>
     <script>
-    new Vue({
+    const appDef = ({
       components: {
         BedokWrapper,
       },
@@ -58,6 +59,8 @@ https://bedok-dist.github/ webapp (in-progress)
         }
       },
     })
+    Vue.createApp(appDef).mount(appDef.el) // vue3
+    // Vue.version[0]==='3' ? Vue.createApp(appDef).mount(appDef.el) : new Vue(appDef) // both vue2 and vue3
     </script>
 </body>
 ```
@@ -118,4 +121,3 @@ https://bedok-dist.github/ webapp (in-progress)
 
         </bedok-wrapper>
 ```
-
