@@ -23,7 +23,7 @@ https://bedok-dist.github/ webapp (in-progress)
     <div id="app"></div>
     <script id="x-app" type="text/x-template">
       <div class="lg:max-w-[1000px] border border-[white] mx-auto">
-        <bedok-wrapper :page.sync="page">
+        <bedok-wrapper :page.sync="page" v-model:page="page">
   
           <template #menu="{onRoute}">
             <button @click.prevent="() => onRoute(1)">Strona główna</button>
