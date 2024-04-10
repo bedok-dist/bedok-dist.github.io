@@ -8,8 +8,8 @@ https://bedok-dist.github/ webapp (in-progress)
 ```html
 <head>
     <script>
-      function defineModule(name, buildModule) {
-        window.BedokWrapper = buildModule()
+      function defineModule(name, buildModuleBuilder) {
+        window.bedokWrapperPluginBuilder = buildModuleBuilder()
       }
     </script>
     <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-app.js"></script>
@@ -48,7 +48,6 @@ https://bedok-dist.github/ webapp (in-progress)
     <script>
     const appDef = ({
       components: {
-        BedokWrapper,
       },
       template: '#x-app',
       el: '#app',
@@ -59,7 +58,7 @@ https://bedok-dist.github/ webapp (in-progress)
         }
       },
     })
-    Vue.createApp(appDef).mount(appDef.el) // vue3
+    Vue.createApp(appDef).use(window.bedokWrapperPluginBuilder(Vue)).mount(appDef.el) // vue3
     // Vue.version[0]==='3' ? Vue.createApp(appDef).mount(appDef.el) : new Vue(appDef) // both vue2 and vue3
     </script>
 </body>
