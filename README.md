@@ -23,7 +23,7 @@ https://bedok-dist.github/ webapp (in-progress)
     <div id="app"></div>
     <script id="x-app" type="text/x-template">
       <div class="lg:max-w-[1000px] border border-[white] mx-auto">
-        <bedok-wrapper :page.sync="page" v-model:page="page">
+        <bedok-wrapper v-model:page="page">
   
           <template #menu="{onRoute}">
             <button @click.prevent="() => onRoute(1)">Strona główna</button>
@@ -34,10 +34,10 @@ https://bedok-dist.github/ webapp (in-progress)
             <h2>Lista ogłoszeń</h2>
             <ul>
               <li v-if="isLoading">Trwa wczytywanie</li>
-              <li v-else v-for="({id, data: ad}, index) in ads" :key="index" class="card1" style="display: unset;">
+              <li v-else v-for="(ad, index) in ads" :key="index" class="card1" style="display: unset;">
                 <pre>{{ JSON.stringify(ad, null, 2) }}</pre>
                 <button @click="removeAd(id)" title="remove">x</button>
-                <button @click="openAdDetails({id, data: ad})">otwórz</button>
+                <button @click="openAdDetails(ad)">otwórz</button>
               </li>
             </ul>
           </template>
@@ -79,10 +79,10 @@ https://bedok-dist.github/ webapp (in-progress)
             <h2>Lista ogłoszeń</h2>
             <ul>
               <li v-if="isLoading">Trwa wczytywanie</li>
-              <li v-else v-for="({id, data: ad}, index) in ads" :key="index" class="card1" style="display: unset;">
+              <li v-else v-for="(ad, index) in ads" :key="index" class="card1" style="display: unset;">
                 <pre>{{ JSON.stringify(ad, null, 2) }}</pre>
                 <button @click="removeAd(id)" title="remove">x</button>
-                <button @click="openAdDetails({id, data: ad})">otwórz</button>
+                <button @click="openAdDetails(ad)">otwórz</button>
               </li>
             </ul>
           </template>

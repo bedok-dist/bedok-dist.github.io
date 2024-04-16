@@ -36,10 +36,10 @@
             <h2>Lista ogłoszeń</h2>
             <ul>
               <li v-if="isLoading">Trwa wczytywanie</li>
-              <li v-else v-for="({id, data: ad}, index) in ads" :key="index" class="card1" style="display: unset;">
+              <li v-else v-for="(ad, index) in ads" :key="index" class="card1" style="display: unset;">
                 <pre>{{ JSON.stringify(ad, null, 2) }}</pre>
                 <button @click="removeAd(id)" title="remove">x</button>
-                <button @click="openAdDetails({id, data: ad})">otwórz</button>
+                <button @click="openAdDetails(ad)">otwórz</button>
               </li>
             </ul>
           </template>
@@ -55,29 +55,28 @@
     </script>
   
     <script>
-      function defineModule(name, buildModule) {
-        window.BedokWrapper = buildModule()
+      function defineModule(name, buildModuleBuilder) {
+        window.bedokWrapperPluginBuilder = buildModuleBuilder()
       }
     </script>
-    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-app.js"></script>
-    <script src="https://unpkg.com/firebase@7.6.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-database.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue@3.3.8"></script>
     <script src="./wrapper.js"></script>
     <script>
-    new Vue({
-      components: {
-        BedokWrapper,
-      },
-      template: '#x-app',
-      el: '#app',
-      data() {
-        return {
-          page: 1,
-          window,
-        }
-      },
-    })
+      const appDef = ({
+        components: {
+        },
+        template: '#x-app',
+        el: '#app',
+        data() {
+          return {
+            page: 1,
+            window,
+          }
+        },
+      })
+      Vue.createApp(appDef) // vue3
+        .use(window.bedokWrapperPluginBuilder(Vue))
+        .mount(appDef.el)
     </script>
   
 </body>
