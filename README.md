@@ -264,3 +264,5 @@ Ważne: zauważmy, że należy wyświetlać notyfiakcje, jeśli jest `token` (je
 +          </dialog>
         </template>
 ```
+
+10. TODO reset pass, change pass, photos (ad, profile) list + edit
