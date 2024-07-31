@@ -4,12 +4,13 @@
     <div class="lg:max-w-[1000px] border border-[white] mx-auto">
       <bedok-wrapper :page.sync="page" @update:page="p => page = p">
 
-        <template #menu="{ onRoute, token, notifications }">
+        <template #menu="{onRoute, token, notifications, onLogout}">
           <button @click.prevent="() => onRoute(1)">Strona główna</button>
           <button @click.prevent="() => onRoute(2)">Lista ogłoszeń</button>
-          <button v-if="token" @click.prevent="() => onRoute('profile')" :disabled="!token">Mój profil</button>
-          <button @click="() => onRoute('login')" v-if="!token">Zaloguj</button>
+          <button @click="() => {debugger; onRoute('login')}" v-if="!token">Zaloguj</button>
+          <button @click="() => {onRoute('register')}" v-if="!token">Zarejestruj się</button>
           <button @click="() => {onRoute(10), onLogout()}" v-else>Wyloguj</button>
+          <button v-if="token" @click.prevent="() => onRoute('profile')" :disabled="!token">Mój profil</button>
           <button v-if="token" @click="window.notifs.show()" :title="JSON.stringify(notifications, null, 2)">🔔 ({{ notifications?.length }})</button>
           <dialog id="notifs">
             <ul>
@@ -20,6 +21,47 @@
           </dialog>
         </template>
 
+        <template #mainpage="{first30Ads, openAdDetails, createAd, newModel}">
+          <h1>Strona główna</h1>
+          <h2 title="30 najnowszych ogłoszeń">Najnowsze ogłoszenia</h2>
+          <div v-if="!first30Ads.length">Brak ogłoszeń</div>
+          <ul v-else>
+            <li v-for="ad in first30Ads" class="card">
+              {{ad.data}}<br/>
+              <button @click="openAdDetails(ad)">otwórz</button>
+            </li>
+          </ul>
+          <br/>
+          <button @click="() => window.dialog.showModal()">dodaj nowe ogłoszenie</button>
+          <dialog id="dialog">
+            <button @click="window.dialog.close()">x</button>
+            <form method="dialog" @submit="() => {createAd(newModel)}">
+              <input type="text" v-model="newModel.title" placeholder="tytuł"><br>
+              <input type="text" v-model="newModel.city" placeholder="miasto"><br>
+              <input type="text" v-model="newModel.price" placeholder="cena"><br>
+              <button type="submit">Dodaj</button>
+            </form>
+          </dialog>
+        </template>
+
+        <template #adslist="{ads, createAd, newModel, removeAd, isLoading, openAdDetails}">
+          <h2>Lista ogłoszeń</h2>
+          <ul>
+            <li v-if="isLoading">Trwa wczytywanie</li>
+            <li v-else v-for="(ad, index) in ads" :key="index" class="card1" style="display: unset;">
+              <pre>{{ JSON.stringify(ad, null, 2) }}</pre>
+              <button @click="removeAd(id)" title="remove">x</button>
+              <button @click="openAdDetails(ad)">otwórz</button>
+            </li>
+          </ul>
+        </template>
+
+        <template #details="{ ad }">
+          <h2>Szczegóły ogłoszenia</h2>
+          <button @click="page = 1">powrót</button>
+          <pre>{{JSON.stringify(ad, null, 2)}}</pre>
+        </template>
+
         <template #login="{ onRoute, apiClient, token, form, onLogin, onRegister }">
           <form @submit.prevent="(ev) => onLogin(form, token).then((t) => {onRoute('adslist');})">
             <h1>Zaloguj się</h1>
@@ -28,84 +70,53 @@
             <input v-model="form.password" placeholder="Hasło"/>
             <br>
             <input type="submit" value="Zaloguj"/>
-            <br>
-            <div title="resetuj hasło form">
-              <button type="button" @click="apiClient.resetPassword(form.email).then(r => resetPwdResp = r)">Zresetuj hasło</button>
-              <pre v-if="resetPwdResp">{{JSON.stringify(resetPwdResp, null, 2)}}</pre>
-            </div>
-            <!-- <input type="button" @click="apiClient.fetchApi(`/host/reset-password?email=${form.email}`)"> -->
             <details>
               <summary>Zarejestruj</summary>
               <p>Podaj jedno pole więcej i możesz się zarejestrować (powyższe pola są współdzielone)</p>
               <div>
                 <input v-model="form.phone" placeholder="Nr telefonu"/>
                 <br>
-                <button @click.prevent="(ev) => onRegister(form, {fullObj: true}).then((res) => {debugger; if (res.id) {onRoute('login'); window.alert('ok'); form.phone = ''} else window.alert('err');})">Zarejestruj się</button>
+                  <button @click.prevent="(ev) => onRegister(form, {fullObj: true}).then((res) => {debugger; if (res.id) {onRoute('login'); window.alert('ok'); form.phone = ''} else window.alert('err');})">Zarejestruj się</button>
               </div>
             </details>
+            <br/>
+            Nie masz konta? <button @click="() => onRoute('register')">Zarejestruj się</button>
           </form>
         </template>
 
-        <template #mainpage="{first30Ads, openAdDetails, createAd, newModel, onRoute, form, onSearch, notifications}">
-          <ul>
-            <li v-for="ad in first30Ads">{{JSON.stringify(ad)}}</li>
-          </ul>
-
-          <details>
-            <summary>Wyszukaj z kryteriami</summary>
-            <input type="text" id="critDateFrom">-
-            <input type="text" id="critDateTo"><br/>
-            <span id="critRes"></span>
-            <button @click="apiClient.fetchApi('/advertisement/criteria', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({dateFrom: window.critDateFrom.value, dateTo: window.critDateTo.value})}).then(r => r.text().then(r => window.critRes.innerHTML = r))">Wyszukaj z kryteriami</button>
-          </details>
-        </template>
-
-        <template v-slot:adslist="{ads, onRoute, createAd, newModel, removeAd, isLoading, openAdDetails, editAd, editAdId}">
-          <h2>Lista ogłoszeń</h2>
-          <div><button @click="onRoute('adcreate')">dodaj nowe</button></div>
-          <ul>
-            <li v-if="isLoading">Trwa wczytywanie</li>
-            <li v-else v-for="(ad, index) in ads" :key="index" class="card1" style="display: unset;">
-              <pre>{{ JSON.stringify(ad, null, 2) }}</pre>
-              <button @click="removeAd(id)" title="remove">x</button>
-              <button @click="() => {openAdDetails({id: ad.advertisementId, data: ad})}">otwórz</button>
-              <!-- <button v-if="'only if host is logged user',0" @click="() => {editAd(ad.advertisementId, ad)}">edytuj</button> -->
-              <details>
-                <summary>Zdjęcia ({{ad?.mainPhotos?.length}})</summary>
-                <img v-for="el in ad.mainPhotos" :src="`data:image/png;base64,${el?.data}`"/>
-              </details>
-            </li>
-          </ul>
-        </template>
-
-        <template #adedit="{updateAd, tempAds, editAd, ad, editAdId, apiClient}">
-          <div>
-            <button @click="page = 'adslist'">powrót</button>
-            <pre contenteditable @blur="ev => {ad = JSON.parse(ev.target.textContent)}">{{
-              JSON.stringify(ad, null, 2)
-            }}</pre>
-            <button @click="() => updateAd(e?.id || e?.advertisementId || editAdId, ad)">zapisz</button>
-            <hr/>
-            <details>
-              <summary>Wgraj zdjęcie ad</summary>
-              <input type="file" id="adInput">
-              <button @click="() => {apiClient.uploadAdPhoto(token, editAdId, window.adInput).then(e => uploadAdPhotoResp = e)}">wyślij</button>
-              <div>
-                <pre v-if="uploadAdPhotoResp">{{JSON.stringify(uploadAdPhotoResp, null, 2)}}</pre>
-              </div>
-            </details>
-            <details>
-              <summary>Zdjęcia ({{ad?.roomPhotos?.length}})</summary>
-              <ul>
-                <li v-if="ad?.roomPhotos?.length === 0">brak</li>
-                <li v-else v-for="e in ad?.roomPhotos || []">
-                  <img :src="`data:image/png;base64,${e?.photo?.data}`"/>
-                  <pre :title="JSON.stringify(e, null, 2)">{{e.id}} (najedź myszką)</pre>
-                  <button title="usuń" @click="apiClient.fetchApi(`/advertisement/${editAdId || ad.id || e.id}/photo${('OR maybe photos?','')}`, {method: 'delete', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({photosIds: [e.id]})})">x</button>
-                </li>
-              </ul>
-            </details>
-          </div>
+        <template #register="{ onRoute, apiClient, token, form, onLogin, onRegister }">
+          <form @submit.prevent="(ev) => onRegister(form, {fullObj: true}).then((t) => {onRoute('adslist');})">
+            <h1>Zarejestruj się</h1>
+            <input id="regEmail" v-model="form.email" placeholder="E-mail"/>
+            <br>
+            <input id="regPass" v-model="form.password" placeholder="Hasło"/>
+            <br>
+            <input id="regPhone" v-model="form.phone" placeholder="Nr telefonu"/>
+            <br>
+            <button @click.prevent="(ev) => onRegister(form, {fullObj: true})
+                .then((res) => {
+                  debugger;
+                  if (res.id) {
+                    onRoute('login');
+                    window.alert('ok');
+                    form.phone = ''
+                  } else {
+                    window.alert('err');
+                  }
+                })">Zarejestruj się</button>
+            <button id="regBtn" @click.prevent="() => {
+              apiClient.fetchApi('/host/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                  email: regEmail.value,
+                  password: regPass.value,
+                  phone: regPhone.value,
+                })}
+              ).then(r => r.text().then(r => window.regBtn.setAttribute('title', r)))
+            }">Zarejestruj się (apiClient call)</button>
+          </form>
+          Masz konto? <button @click="() => onRoute('login')">Zaloguj się</button>
         </template>
 
         <template #adcreate="{createAd, newModel, onRoute}">
@@ -115,44 +126,19 @@
           </form>
         </template>
 
-        <template #details___off="{ ad }">
-          <h2>Szczegóły ogłoszenia</h2>
-          <button @click="page = 1">powrót</button>
-          <pre>{{JSON.stringify(ad, null, 2)}}</pre>
-          <div>Zdjęcia</div>
-          <ul>
-            <li v-for="e in ad?.data?.mainPhotos || ad?.roomPhotos || []">
-              <img :src="`data:image/png;base64,${e?.data}`"/>
-            </li>
-          </ul>
-        </template>
-
-        <template #profile="{ onRoute, apiClient, token, myAds, myData, updateAd, tempAds, editAd, editAdId, window }">
+        <template #profile="{ onRoute, apiClient, token, myAds, myData, updateAd, tempAds, editAd, editAdId }">
           <details open>
             <summary>Dane mojego profilu:</summary>
-            <pre id="userData" contenteditable>{{
+            <pre>{{
               JSON.stringify(myData, null, 2)
             }}</pre>
-            <button title="zapisz (na dzien 3 jul 24 - nie działa)" @click="apiClient.fetchApi(`/host`, {method: 'patch', headers: {'Content-Type': 'application/json'}, body: window.userData.textContent})">zapisz</button>
-          </details>
-          <details>
-            <summary>Zdjęcie</summary>
-            <img :src="`data:image/png;base64,${myData?.photo?.data}`"/>
-          </details>
-          <details>
-            <summary>Wgraj zdjęcie profil</summary>
-            <input type="file" id="photoInput">
-            <button @click="() => {debugger; apiClient.uploadPhoto(token, window.photoInput).then(e => uploadResp = e)}">wyślij</button>
-            <div>
-              <pre v-if="uploadResp">{{JSON.stringify(uploadResp, null, 2)}}</pre>
-            </div>
           </details>
           <details open>
             <summary>Moje ogłoszenia (jako host):</summary>
             <div>
               <ul>
                 <li v-for="(e, i) in myAds">
-                  <pre contenteditable @blur="ev => {debugger; tempAds[i] = JSON.parse(ev.target.textContent)}">{{
+                  <pre contenteditable>{{
                     JSON.stringify(e, null, 2)
                   }}</pre>
                   <button @click="editAd(e.id || e.advertisementId)">edytuj</button>
@@ -162,15 +148,16 @@
               </ul>
             </div>
           </details>
+        </template>
 
-          <details>
-            <summary>Zmien hasło</summary>
-            Obecne hasło <input type="text" id="currentPass" disbaled><br/>
-            Nowe hasło <input type="text" id="newPass" placeholder="np. KawaInka3Karlolinka"><br/>
-            <button @click="apiClient.fetchApi('/user/password', {method: 'POST', body: JSON.stringify({newPass: window.newPass.value})}).then(r => window.passwdResp.value = JSON.stringify(r, null, 2))">Zmień</button>
-            <br/>
-            <textarea id="passwdResp"></textarea>
-          </details>
+        <template #adedit="{updateAd, ad, editAdId}">
+          <div>
+            <button @click="page = 'adslist'">powrót</button>
+            <pre contenteditable @blur="ev => {ad = JSON.parse(ev.target.textContent)}">{{
+              JSON.stringify(ad, null, 2)
+            }}</pre>
+            <button @click="() => updateAd(e?.id || e?.advertisementId || editAdId, ad)">zapisz</button>
+          </div>
         </template>
 
       </bedok-wrapper>
@@ -184,6 +171,7 @@
   </script>
   <script src="https://unpkg.com/vue@3.3.8"></script>
   <script src="./wrapper.js"></script>
+  <!-- <script src="/bedok-front-lib/src/components/wrapper.js"></script> -->
   <script>
     const appDef = ({
       components: {

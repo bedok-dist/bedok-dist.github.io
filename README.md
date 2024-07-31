@@ -266,3 +266,5 @@ Ważne: zauważmy, że należy wyświetlać notyfiakcje, jeśli jest `token` (je
 ```
 
 10. TODO reset pass, change pass, photos (ad, profile) list + edit
+
+11. TODO register slot
