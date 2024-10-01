@@ -278,3 +278,5 @@ CHANGELOG 2024-10-01:
   - fix saving an ad (no `v-for` element `e`, use `ad?.id`)
 
 13. TODO, createReservations, openAdDetails
+
+14. loading view from location.hash, openaddetails load data, updating router view, use string view names rather than numbers, v-if=ad.data for loading, updateAd error signaling
