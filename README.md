@@ -270,3 +270,11 @@ Ważne: zauważmy, że należy wyświetlać notyfiakcje, jeśli jest `token` (je
 11. TODO register slot
 
 12. TODO onReserve, onLogout, deleteReserve, uploadPhoto, offline-mode (double click background, localStorage.mockedapi=1)
+
+CHANGELOG 2024-10-01:
+
+  - saving to localstorage
+  - confirm to enable mockapi
+  - fix saving an ad (no `v-for` element `e`, use `ad?.id`)
+
+13. TODO, createReservations, openAdDetails

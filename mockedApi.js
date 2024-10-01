@@ -1,6 +1,6 @@
 {
     let token = window.localStorage['token'] ?? 'abc123'
-  
+
     window.translateRoute = r => {
       debugger
       return r
@@ -57,8 +57,8 @@
       icon_vacuum_cleaner5:  "icon_vacuum_cleaner5",
       other5:  "other5"
     }
-  
-    const ads = [
+
+    const ads = window.ads = [
       // {
       //   title: 'mieszkanie',
       // },
@@ -147,6 +147,27 @@
         "active": true
       },
     ]
+
+  let isLoadOk = false
+  function loadAdsFromLocalStorage() {
+    try {
+      const loadedAds = JSON.parse(localStorage['ads'])
+      ads.splice(0, ads.length)
+      ads.push(...loadedAds)
+      isLoadOk = true
+    } catch (e) {
+      console.error('[mockapi] LOCALSTORAGE: error in loading ads from the localstorage')
+    }
+  }
+  loadAdsFromLocalStorage()
+
+  function saveAds(ads = window.ads) {
+    if (!isLoadOk) {
+      debugger
+    }
+    window.localStorage.setItem('ads', JSON.stringify(ads, null, 2))
+  }
+
     function adAvailableSince(ad, form) {
       return true
     }
@@ -155,7 +176,7 @@
       {id: 2},
     ]
     const reservations = []
-  
+
     const flagsToFeatures = {
       // "ironRoom": "iron",
       // "hooverRoom": false,
@@ -178,7 +199,7 @@
         // ...ad,
       })
     }
-  
+
     window['mockedApi'] = {
       login(form) {
         const resp = {
@@ -217,6 +238,7 @@
         }
         ad['advertisementId'] = ad.id
         ads.push(ad)
+        saveAds(ads)
         return Promise.resolve({
           resp: {
             status: 200,
@@ -244,6 +266,7 @@
         if (ad) {
           ad.guests.push(data2)
         }
+        saveAds()
         reservations.push(data2)
         return Promise.resolve(data2)
       },
@@ -252,6 +275,7 @@
         reservations.splice(reservations.indexOf(data), 1)
         const ad = ads.find(e => e.advertisementId == data['advertisementId'])
         ad.guests.splice(ad.guests.indexOf(data), 1)
+        saveAds()
         return Promise.resolve(reservations)
       },
       findTenantReservations(...args) {
@@ -270,6 +294,7 @@
           // throw 'cannot update not your own ad'
         }
         Object.assign(ad, data)
+        saveAds()
         return Promise.resolve(ad)
       },
       async uploadAdPhoto(token, editAdId, adInput) {
@@ -299,6 +324,7 @@
           ad.roomPhotos.push(photo)
           // ad.mainPhotos.push({photo: {data: 'data:image/png;base64,'+photo.data}})
           ad.mainPhotos.push({photo: {data: photo.data}})
+          saveAds()
           res(ad)
         })
         debugger
@@ -307,6 +333,7 @@
         const ad = await this.adDetailsById(ad_.id ?? ad_.advertisementId ?? ad_)
         ad.mainPhotos.splice(photoIdx, 1)
         ad.roomPhotos.splice(photoIdx, 1)
+        saveAds()
         return Promise.resolve(ad)
       },
       getMyAds() {
@@ -342,7 +369,9 @@
       deleteAdById(id) {
         // const arr = ads.filter(e => e.id !== id || e === id)
         // ads = arr;
-        ads.splice(ads.findIndex(e => e.id !== id || e === id), 1)
+        const removedAd = ads.splice(ads.findIndex(e => e.id !== id || e === id), 1)
+        debugger
+        saveAds()
         return Promise.resolve(ads);
       },
       findMyProfile() {
@@ -368,4 +397,3 @@
       },
     };
   }
-  
