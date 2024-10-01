@@ -263,7 +263,7 @@
       el: '#app',
       data() {
         return {
-          page: 1,
+          page: (location.hash.substr(1).indexOf(',') !== -1 ? location.hash.substr(1).split(',') : location.hash.substr(1)) || 1,
           window,
         }
       },
