@@ -124,7 +124,7 @@
             <pre contenteditable @blur="ev => {ad = JSON.parse(ev.target.textContent)}">{{
               JSON.stringify(ad, null, 2)
             }}</pre>
-            <button @click="() => updateAd(e?.id || e?.advertisementId || editAdId, ad)">zapisz</button>
+            <button @click="() => updateAd(ad?.id || ad?.advertisementId || editAdId, ad)">zapisz</button>
             <hr/>
             <details>
               <summary>Wgraj zdjęcie ogłoszenia</summary>
